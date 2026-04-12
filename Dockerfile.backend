@@ -2,15 +2,15 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY sistema/backend ./sistema/backend
-COPY sistema/tests ./sistema/tests
+COPY sistema/backend/package*.json ./
+COPY sistema/backend/src ./src
+COPY sistema/backend/tsconfig.json ./
 
-RUN npm install --workspaces
-RUN npm run build -w sistema/backend
+RUN npm install
+RUN npm run build
 
 ENV PORT=3001
 
 EXPOSE 3001
 
-CMD ["npm", "start", "-w", "sistema/backend"]
+CMD ["npm", "start"]

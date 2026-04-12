@@ -2,14 +2,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY sistema/frontend ./sistema/frontend
-COPY sistema/tests ./sistema/tests
+COPY sistema/frontend/package*.json ./
+COPY sistema/frontend/src ./src
+COPY sistema/frontend/index.html ./
+COPY sistema/frontend/vite.config.ts ./
+COPY sistema/frontend/tsconfig.json ./
 
-RUN npm install --workspaces
+RUN npm install
 
 ENV VITE_API_URL=http://backend:3001
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev", "-w", "sistema/frontend"]
+CMD ["npm", "run", "dev"]
