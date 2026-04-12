@@ -1,0 +1,16 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY sistema/backend ./sistema/backend
+COPY sistema/tests ./sistema/tests
+
+RUN npm install --workspaces
+RUN npm run build -w sistema/backend
+
+ENV PORT=3001
+
+EXPOSE 3001
+
+CMD ["npm", "start", "-w", "sistema/backend"]

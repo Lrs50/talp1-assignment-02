@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:3001
+    depends_on:
+      - backend
+    networks:
+      - sistema-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./sistema/backend/data:/app/data
+    environment:
+      - PORT=3001
+    networks:
+      - sistema-network
+
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    ports:
+      - "4444:4444"
+    networks:
+      - sistema-network
+
+networks:
+  sistema-network:
+    driver: bridge
+
+volumes:
+  backend-data:

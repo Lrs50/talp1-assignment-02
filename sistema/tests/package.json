@@ -1,0 +1,20 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:watch": "cucumber-js --watch"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "selenium-webdriver": "^4.14.0",
+    "tsconfig-paths": "^4.2.0"
+  }
+}
