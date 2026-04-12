@@ -1,84 +1,119 @@
-Feature: Student Assessment Management
+Feature: Assessment Matrix Management
   As an instructor
-  I want to assess students per learning goal in each class
-  So that I can track their progress towards the course objectives
+  I want to view and update student assessments in a matrix format
+  So that I can quickly see all students' progress on all goals in one class
 
-  Scenario: Add an assessment successfully
-    Given there is a class "Software Engineering 101" with enrolled student "David Martinez"
-    And I am on the assessments page for class "Software Engineering 101"
-    When I fill in the assessment form with:
-      | field | value |
-      | student | David Martinez |
-      | goal | Understands OOP concepts |
-      | grade | MA |
-    And I click the "Add Assessment" button
-    Then I should see the message "Assessment recorded successfully"
-    And the assessment for "David Martinez" with goal "Understands OOP concepts" should show "MA"
+  Background:
+    Given I am logged in
+    And I am on the assessments page
 
-  Scenario: Reject adding an assessment with invalid grade
-    Given there is a class "Database Design 102" with enrolled student "Emma Thompson"
-    And I am on the assessments page for class "Database Design 102"
-    When I fill in the assessment form with:
-      | field | value |
-      | student | Emma Thompson |
-      | goal | Normalizes database schemas |
-      | grade | Excellent |
-    And I click the "Add Assessment" button
-    Then I should see the error "Grade must be one of: MANA, MPA, MA"
-    And the assessment should not be recorded
+  # Matrix View Scenarios
 
-  Scenario: List assessments for a class
-    Given there is a class "Web Development 103" with enrolled students:
+  Scenario: View assessment matrix for a class
+    Given there is a class "Software Engineering 101" with enrolled students:
       | name |
-      | Frank Garcia |
-      | Grace Lee |
-    And assessments exist:
+      | David Martinez |
+      | Emma Thompson |
+    And assessments exist for the class:
       | student | goal | grade |
-      | Frank Garcia | Builds responsive layouts | MA |
-      | Frank Garcia | Understands REST APIs | MPA |
-      | Grace Lee | Builds responsive layouts | MPA |
-    When I am on the assessments page for class "Web Development 103"
-    Then I should see 3 assessments in the list
-    And I should see assessment for "Frank Garcia" with goal "Builds responsive layouts" and grade "MA"
-    And I should see assessment for "Grace Lee" with goal "Understands REST APIs" as "Not assessed"
+      | David Martinez | Understands OOP concepts | MA |
+      | David Martinez | Writes clean code | MPA |
+      | Emma Thompson | Understands OOP concepts | MANA |
+    When I select "Software Engineering 101" from the class dropdown
+    Then I should see the assessment matrix with:
+      - Row headers: David Martinez, Emma Thompson
+      - Column headers: Understands OOP concepts, Writes clean code
+      - Cell for David Martinez / "Understands OOP concepts" showing "MA"
+      - Cell for David Martinez / "Writes clean code" showing "MPA"
+      - Cell for Emma Thompson / "Understands OOP concepts" showing "MANA"
+      - Empty cell for Emma Thompson / "Writes clean code"
 
-  Scenario: Update a student's assessment
-    Given there is an assessment with:
-      | field | value |
-      | student | Henry Brown |
-      | class | Mobile Development 104 |
-      | goal | Creates multi-screen apps |
-      | grade | MANA |
-    And I am on the assessments page for class "Mobile Development 104"
-    When I click the edit button for the assessment
-    And I change the grade to "MPA"
-    And I click the "Save" button
-    Then I should see the message "Assessment updated successfully"
-    And the assessment for "Henry Brown" with goal "Creates multi-screen apps" should show "MPA"
+  Scenario: Edit a grade in the assessment matrix (inline)
+    Given there is a class "Database Design 102" with enrolled student "Frank Garcia"
+    And the matrix shows "Frank Garcia" with "MANA" under goal "Normalizes schemas"
+    When I click the cell for "Frank Garcia" / "Normalizes schemas"
+    And I select "MA" from the grade dropdown
+    Then the assessment should update immediately without leaving the page
+    And the cell should display "MA"
+    And I should see a visual confirmation (checkmark or highlight)
+    And an email notification should be queued for the daily digest
 
-  Scenario: Reject updating an assessment with invalid grade
-    Given there is an assessment with:
-      | field | value |
-      | student | Iris White |
-      | class | Cloud Computing 105 |
-      | goal | Deploys to cloud platforms |
-      | grade | MA |
-    And I am on the assessments page for class "Cloud Computing 105"
-    When I click the edit button for the assessment
-    And I change the grade to "Needs Improvement"
-    And I click the "Save" button
-    Then I should see the error "Grade must be one of: MANA, MPA, MA"
-    And the assessment grade should remain "MA"
+  Scenario: Add a new assessment by clicking an empty cell
+    Given there is a class "Web Development 103" with enrolled student "Grace Lee"
+    And the cell for "Grace Lee" / "Builds responsive layouts" is empty
+    When I click the empty cell
+    And I select "MPA" from the grade dropdown
+    Then the new assessment should be created immediately
+    And the cell should display "MPA"
+    And an email notification should be queued for the daily digest
 
-  Scenario: Remove an assessment
-    Given there is an assessment with:
-      | field | value |
-      | student | Jacob Miller |
-      | class | Data Science 106 |
-      | goal | Analyzes datasets |
-      | grade | MPA |
-    And I am on the assessments page for class "Data Science 106"
-    When I click the delete button for the assessment
-    And I confirm the deletion
-    Then I should see the message "Assessment removed successfully"
-    And the assessment for "Jacob Miller" with goal "Analyzes datasets" should not appear in the list
+  Scenario: Grade dropdown only shows valid options
+    Given I am viewing a class with the assessment matrix displayed
+    When I click any cell to edit a grade
+    Then the dropdown should contain exactly three options:
+      | option |
+      | MANA |
+      | MPA |
+      | MA |
+    And no other values should be selectable
+
+  Scenario: Switch between classes using the class selector
+    Given I have multiple classes:
+      | topic | year | semester |
+      | Physics 101 | 2024 | 1 |
+      | Chemistry 202 | 2024 | 2 |
+    And I am viewing the matrix for "Physics 101"
+    When I click the class dropdown
+    And I select "Chemistry 202"
+    Then the matrix should update to show students enrolled in "Chemistry 202"
+    And the column headers should reflect goals used in "Chemistry 202"
+
+  Scenario: Handle a class with no enrolled students
+    Given there is a class "Advanced Art 107" with no enrolled students
+    When I select "Advanced Art 107" from the class dropdown
+    Then I should see the message "No students enrolled in this class"
+    And I should see an "Enroll Students" button
+
+  Scenario: Clear a grade from the matrix (delete assessment)
+    Given I am viewing the matrix for "Data Science 106"
+    And "Jacob Miller" has "MPA" under goal "Analyzes datasets"
+    When I click the cell for "Jacob Miller" / "Analyzes datasets"
+    And I select the empty option to clear the grade
+    Then the assessment should be deleted
+    And the cell should become empty
+    And an email notification should be queued for the daily digest
+
+  # Enrollment Management (within Assessments context)
+
+  Scenario: Enroll a student directly from the assessments matrix
+    Given I am viewing the matrix for "Economics 108"
+    When I click the "Enroll Student" button
+    And I select "Bob Wilson" from the list of available students
+    And I confirm the enrollment
+    Then "Bob Wilson" should appear as a new row in the matrix (at the bottom)
+    And all cells in "Bob Wilson"'s row should be empty
+
+  Scenario: Remove a student from class (within assessments view)
+    Given I am viewing the matrix for "History 109"
+    And "Patricia Green" is enrolled and appears as a row
+    When I click the remove button (X icon) next to "Patricia Green"
+    And I confirm the removal
+    Then "Patricia Green" should no longer appear in the matrix
+    And I should see the message "Student removed from class"
+    And all assessments for "Patricia Green" in this class should be deleted
+
+  # Error Handling
+
+  Scenario: Prevent invalid grade entry via dropdown
+    Given I am viewing an assessment matrix
+    When I click a cell to edit
+    Then the dropdown should only allow selection of valid grades
+    And I should not be able to enter custom/invalid values
+    And the cell should retain its previous value if I cancel
+
+  Scenario: Handle rapid grade changes
+    Given I am viewing the matrix for "Mobile Development 104"
+    And the cell for "Henry Brown" / "Creates multi-screen apps" shows "MANA"
+    When I quickly click the cell, select "MPA", and immediately click another cell
+    Then the first change should be saved before allowing the second edit
+    And the first cell should show "MPA"

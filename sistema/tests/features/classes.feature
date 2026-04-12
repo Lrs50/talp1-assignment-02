@@ -97,3 +97,40 @@ Feature: Class Management
     And I click the "Add" button
     Then I should see the error "This student is already enrolled in this class"
     And the enrollment should not be duplicated
+
+  Scenario: Enroll multiple students at once
+    Given there are students in the system:
+      | name | CPF | email |
+      | Emma Rodriguez | 99999999999 | emma@example.com |
+      | Frank Lewis | 10101010101 | frank@example.com |
+      | Grace Martinez | 11111111111 | grace@example.com |
+    And there is a class "Software Testing 909" in year 2024, semester 2
+    And I am viewing the class "Software Testing 909"
+    When I click the "Enroll Multiple Students" button
+    And I select the following students from the list:
+      | name |
+      | Emma Rodriguez |
+      | Frank Lewis |
+      | Grace Martinez |
+    And I click the "Enroll All" button
+    Then I should see the message "3 students enrolled successfully"
+    And the enrollment list should contain "Emma Rodriguez"
+    And the enrollment list should contain "Frank Lewis"
+    And the enrollment list should contain "Grace Martinez"
+
+  Scenario: Partial success when enrolling multiple students with duplicates
+    Given there are students in the system:
+      | name | CPF | email |
+      | Henry Chen | 12121212121 | henry@example.com |
+      | Isabella Lopez | 13131313131 | isabella@example.com |
+    And "Henry Chen" is already enrolled in class "Database Systems 910"
+    And I am viewing the class "Database Systems 910"
+    When I click the "Enroll Multiple Students" button
+    And I select the following students:
+      | name |
+      | Henry Chen |
+      | Isabella Lopez |
+    And I click the "Enroll All" button
+    Then I should see the message "1 student enrolled successfully, 1 already enrolled"
+    And "Isabella Lopez" should appear in the enrollment list
+    And "Henry Chen" enrollment should not be duplicated
