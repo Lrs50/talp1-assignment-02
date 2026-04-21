@@ -1,8 +1,8 @@
-const { Given, When, Then, Before, After } = require('@cucumber/cucumber')
-const { Builder, By, until, Key } = require('selenium-webdriver')
-const chrome = require('selenium-webdriver/chrome')
+const { Given, When, Then, Before } = require('@cucumber/cucumber')
+const { By, until, Key } = require('selenium-webdriver')
 const { expect } = require('chai')
 const axios = require('axios')
+const { getDriver } = require('./ui-setup')
 
 let driver
 const BASE_URL = 'http://frontend:5173'
@@ -12,29 +12,10 @@ const context = {
   students: {},
 }
 
-Before(async function () {
-  const options = new chrome.Options()
-
-  driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(options)
-    .usingServer('http://localhost:4444/wd/hub')
-    .build()
-
-  try {
-    const students = await axios.get(`${API_URL}/students`)
-    for (const student of students.data.data || []) {
-      await axios.delete(`${API_URL}/students/${student.id}`)
-    }
-  } catch (err) {
-    // ignore if API not ready
-  }
-})
-
-After(async function () {
-  if (driver) {
-    await driver.quit()
-  }
+// Sync — just grabs the shared driver and resets in-memory state
+Before(function () {
+  driver = getDriver()
+  context.students = {}
 })
 
 // ===== GIVEN STEPS =====

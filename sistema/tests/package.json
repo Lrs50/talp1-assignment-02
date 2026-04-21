@@ -2,11 +2,14 @@
   "name": "tests",
   "version": "1.0.0",
   "scripts": {
-    "test": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature'",
-    "test:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature' 2>&1 | tail -10",
+    "test": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' --require '../tests/step_definitions/assessments.js' '../tests/features/students.feature' '../tests/features/assessments.feature'",
+    "test:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' --require '../tests/step_definitions/assessments.js' '../tests/features/students.feature' '../tests/features/assessments.feature' 2>&1 | tail -10",
     "test:students": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature'",
     "test:students:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature' 2>&1 | tail -5",
-    "test:ui": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.ui.js' '../tests/features/students.feature'",
+    "test:assessments": "cd ../backend && cucumber-js --require '../tests/step_definitions/assessments.js' '../tests/features/assessments.feature'",
+    "test:ui": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/students.ui.js' --require '../tests/step_definitions/assessments.ui.js' '../tests/features/students.feature' '../tests/features/assessments.feature'",
+    "test:ui:students": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/students.ui.js' '../tests/features/students.feature'",
+    "test:ui:assessments": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/assessments.ui.js' '../tests/features/assessments.feature'",
     "test:failed": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature' 2>&1 | grep -E '^(\\d+\\)|✔|✖|\\?)'",
     "test:watch": "cucumber-js --watch"
   },
