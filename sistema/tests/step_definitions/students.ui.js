@@ -1,42 +1,36 @@
 const { Given, When, Then, Before, After } = require('@cucumber/cucumber')
-const { Builder, By, until, WebDriver, Capabilities } = require('selenium-webdriver')
+const { Builder, By, until, Key } = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 const { expect } = require('chai')
 const axios = require('axios')
 
 let driver
-const BASE_URL = 'http://localhost:5173'
+const BASE_URL = 'http://frontend:5173'
 const API_URL = 'http://localhost:3001'
 
 const context = {
   students: {},
 }
 
-// Initialize WebDriver before each scenario
 Before(async function () {
-  // Configure Chrome options for visibility
   const options = new chrome.Options()
-  // Don't add --headless to see the browser window
-  // options.addArguments('--disable-gpu') // Optional: can help with rendering
-  
+
   driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(options)
     .usingServer('http://localhost:4444/wd/hub')
     .build()
 
-  // Reset backend data
   try {
     const students = await axios.get(`${API_URL}/students`)
     for (const student of students.data.data || []) {
       await axios.delete(`${API_URL}/students/${student.id}`)
     }
   } catch (err) {
-    // Ignore if API not ready
+    // ignore if API not ready
   }
 })
 
-// Close WebDriver after each scenario
 After(async function () {
   if (driver) {
     await driver.quit()
@@ -45,6 +39,7 @@ After(async function () {
 
 // ===== GIVEN STEPS =====
 
+// Single definition covers both Given/When/And keyword variants
 Given('I am on the students page', async function () {
   await driver.get(BASE_URL)
   await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
@@ -83,9 +78,7 @@ Given('there are students in the system:', async function (dataTable) {
       console.error('Failed to create student:', err.message)
     }
   }
-  // Reload page to show new students
-  await driver.navigate().refresh()
-  await driver.wait(until.elementLocated(By.css('table tbody')), 10000)
+  // Navigation happens in "When/Given I am on the students page"
 })
 
 Given('there is a student with:', async function (dataTable) {
@@ -103,17 +96,10 @@ Given('there is a student with:', async function (dataTable) {
   } catch (err) {
     console.error('Failed to create student:', err.message)
   }
-  // Reload page to show new student
-  await driver.navigate().refresh()
-  await driver.wait(until.elementLocated(By.css('table tbody')), 10000)
+  // Navigation happens in "And I am on the students page"
 })
 
 // ===== WHEN STEPS =====
-
-When('I am on the students page', async function () {
-  await driver.get(BASE_URL)
-  await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
-})
 
 When('I fill in the form with:', async function (dataTable) {
   const row = dataTable.rowsHash()
@@ -149,7 +135,6 @@ When('I click the {string} button', async function (buttonName) {
   if (selector) {
     const button = await driver.findElement(By.css(selector))
     await button.click()
-    // Wait for response
     await driver.sleep(500)
   }
 })
@@ -175,7 +160,9 @@ When('I update the email to {string}', async function (newEmail) {
 
 When('I clear the name field', async function () {
   const nameInput = await driver.findElement(By.css('input[name="name"]'))
-  await nameInput.clear()
+  await nameInput.click()
+  await nameInput.sendKeys(Key.chord(Key.CONTROL, 'a'))
+  await nameInput.sendKeys(Key.BACK_SPACE)
 })
 
 When('I click the delete button for {string}', async function (studentName) {
@@ -185,14 +172,14 @@ When('I click the delete button for {string}', async function (studentName) {
     if (text.includes(studentName)) {
       const deleteBtn = await row.findElement(By.css('button.btn-delete'))
       await deleteBtn.click()
-      await driver.sleep(300)
       break
     }
   }
 })
 
 When('I confirm the deletion', async function () {
-  // Browser shows confirmation dialog automatically
+  await driver.wait(until.alertIsPresent(), 3000)
+  await driver.switchTo().alert().accept()
   await driver.sleep(500)
 })
 
@@ -228,7 +215,8 @@ Then('the student should not be added', async function () {
   expect(messageDiv).to.exist
 })
 
-Then('I should see {number} students in the list', async function (count) {
+Then('I should see {int} students in the list', async function (count) {
+  await driver.wait(until.elementLocated(By.css('table tbody')), 5000)
   const rows = await driver.findElements(By.css('table tbody tr'))
   expect(rows.length).to.equal(count)
 })
@@ -260,7 +248,9 @@ Then("the student's name should remain {string}", async function (studentName) {
 })
 
 Then('the student {string} should not be in the list', async function (studentName) {
-  const tableBody = await driver.findElement(By.css('table tbody'))
-  const text = await tableBody.getText()
+  await driver.sleep(500)
+  const tables = await driver.findElements(By.css('table tbody'))
+  if (tables.length === 0) return // no table means no students at all
+  const text = await tables[0].getText()
   expect(text).not.to.include(studentName)
 })
