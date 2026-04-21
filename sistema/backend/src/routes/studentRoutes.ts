@@ -67,6 +67,11 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { name, email } = req.body
 
+    if (name === undefined && email === undefined) {
+      res.status(400).json({ success: false, error: 'At least one field (name or email) must be provided' })
+      return
+    }
+
     const result = await updateStudent(req.params.id, { name, email })
 
     if (!result.success) {

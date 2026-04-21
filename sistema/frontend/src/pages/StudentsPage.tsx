@@ -13,11 +13,12 @@ interface Student {
 export const StudentsPage: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', cpf: '', email: '' })
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+  const API_URL = ''
 
   // Fetch students on mount
   useEffect(() => {
@@ -49,6 +50,20 @@ export const StudentsPage: React.FC = () => {
     e.preventDefault()
     setMessage(null)
 
+    if (form.name.trim() === '') {
+      setMessage({ type: 'error', text: 'Name is required' })
+      return
+    }
+    if (form.cpf.trim() === '') {
+      setMessage({ type: 'error', text: 'CPF is required' })
+      return
+    }
+    if (form.email.trim() === '') {
+      setMessage({ type: 'error', text: 'Email is required' })
+      return
+    }
+
+    setSubmitting(true)
     try {
       const res = await fetch(`${API_URL}/students`, {
         method: 'POST',
@@ -72,6 +87,8 @@ export const StudentsPage: React.FC = () => {
     } catch (err) {
       console.error('Error adding student:', err)
       setMessage({ type: 'error', text: 'Failed to add student' })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -86,6 +103,7 @@ export const StudentsPage: React.FC = () => {
 
     if (!editingId) return
 
+    setSubmitting(true)
     try {
       const res = await fetch(`${API_URL}/students/${editingId}`, {
         method: 'PUT',
@@ -109,6 +127,8 @@ export const StudentsPage: React.FC = () => {
     } catch (err) {
       console.error('Error updating student:', err)
       setMessage({ type: 'error', text: 'Failed to update student' })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -116,7 +136,7 @@ export const StudentsPage: React.FC = () => {
     if (!confirm('Are you sure you want to delete this student?')) return
 
     setMessage(null)
-
+    setSubmitting(true)
     try {
       const res = await fetch(`${API_URL}/students/${id}`, {
         method: 'DELETE',
@@ -133,12 +153,15 @@ export const StudentsPage: React.FC = () => {
     } catch (err) {
       console.error('Error deleting student:', err)
       setMessage({ type: 'error', text: 'Failed to delete student' })
+    } finally {
+      setSubmitting(false)
     }
   }
 
   const handleCancel = () => {
     setEditingId(null)
     setForm({ name: '', cpf: '', email: '' })
+    setMessage(null)
   }
 
   return (
@@ -163,7 +186,6 @@ export const StudentsPage: React.FC = () => {
             value={form.name}
             onChange={handleInputChange}
             placeholder="John Silva"
-            required
           />
         </div>
 
@@ -193,8 +215,10 @@ export const StudentsPage: React.FC = () => {
         </div>
 
         <div className="form-actions">
-          <button type="submit">{editingId ? 'Save' : 'Add Student'}</button>
-          {editingId && <button type="button" onClick={handleCancel}>Cancel</button>}
+          <button type="submit" disabled={submitting}>
+            {submitting ? (editingId ? 'Saving…' : 'Adding…') : (editingId ? 'Save' : 'Add Student')}
+          </button>
+          {editingId && <button type="button" onClick={handleCancel} disabled={submitting}>Cancel</button>}
         </div>
       </form>
 
@@ -217,7 +241,7 @@ export const StudentsPage: React.FC = () => {
             </thead>
             <tbody>
               {students.map((student) => (
-                <tr key={student.id}>
+                <tr key={student.id} className={student.id === editingId ? 'editing-row' : ''}>
                   <td>{student.name}</td>
                   <td>{student.cpf}</td>
                   <td>{student.email}</td>

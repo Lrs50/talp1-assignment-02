@@ -141,6 +141,11 @@
   background-color: #f0f0f0;
 }
 
+.editing-row {
+  background-color: #fff3cd;
+  outline: 2px solid #ffc107;
+}
+
 .btn-edit,
 .btn-delete {
   padding: 0.5rem 1rem;
