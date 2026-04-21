@@ -26,6 +26,17 @@ Use exactly these three values for grades:
 - Validate all route inputs before processing
 - Return explicit error messages with appropriate HTTP status codes
 
+## Self-Validation Before Running
+
+Before executing any code, review every generated file and verify:
+- All imported modules exist and use correct paths (no .js extensions in CommonJS)
+- All TypeScript types are explicit — no implicit `any`
+- All functions referenced in routes exist in services
+- All environment variables are defined before use
+- `tsconfig.json` settings are mutually compatible
+
+Fix all identified issues before running any build or test command.
+
 ## Development Cycle
 Follow this sequence for every feature:
 1. Write the Gherkin scenario in `sistema/tests/features/`
