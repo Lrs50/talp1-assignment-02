@@ -1,8 +1,11 @@
-import { Given, When, Then, Before } from '@cucumber/cucumber'
-import request from 'supertest'
-import { expect } from 'chai'
-import app from '../../backend/src/index.js'
-import { getStudents, saveStudents } from '../../backend/src/services/data.js'
+const { Given, When, Then, Before } = require('@cucumber/cucumber')
+const request = require('supertest')
+const { expect } = require('chai')
+const appModule = require('../../backend/dist/index.js')
+const { getStudents, saveStudents } = require('../../backend/dist/services/data.js')
+
+// Handle both ES6 default exports and CommonJS exports
+const app = appModule.default || appModule
 
 const context = {
   students: {},
@@ -23,10 +26,6 @@ Before(async function () {
 })
 
 // ===== GIVEN STEPS =====
-
-Given('I am on the students page', async function () {
-  // Just a marker - in API testing, this means we're ready to make requests
-})
 
 Given('there is a student with CPF {string}', async function (cpf) {
   const students = await getStudents()
@@ -176,7 +175,7 @@ Then('the student should not be added', async function () {
   expect(context.response.success).to.be.false
 })
 
-Then('I should see {number} students in the list', async function (count) {
+Then('I should see {int} students in the list', async function (count) {
   const res = await request(app).get('/students')
   const students = res.body.data
   expect(students.length).to.equal(count)

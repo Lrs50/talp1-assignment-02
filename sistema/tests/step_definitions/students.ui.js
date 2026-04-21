@@ -1,7 +1,8 @@
-import { Given, When, Then, Before, After } from '@cucumber/cucumber'
-import { Builder, By, until, WebDriver } from 'selenium-webdriver'
-import { expect } from 'chai'
-import axios from 'axios'
+const { Given, When, Then, Before, After } = require('@cucumber/cucumber')
+const { Builder, By, until, WebDriver, Capabilities } = require('selenium-webdriver')
+const chrome = require('selenium-webdriver/chrome')
+const { expect } = require('chai')
+const axios = require('axios')
 
 let driver
 const BASE_URL = 'http://localhost:5173'
@@ -13,8 +14,14 @@ const context = {
 
 // Initialize WebDriver before each scenario
 Before(async function () {
+  // Configure Chrome options for visibility
+  const options = new chrome.Options()
+  // Don't add --headless to see the browser window
+  // options.addArguments('--disable-gpu') // Optional: can help with rendering
+  
   driver = await new Builder()
     .forBrowser('chrome')
+    .setChromeOptions(options)
     .usingServer('http://localhost:4444/wd/hub')
     .build()
 

@@ -1,7 +1,7 @@
-export default {
+module.exports = {
   default: {
     paths: ['features/**/*.feature'],
-    require: ['step_definitions/**/*.js'],
+    require: ['step_definitions/students.js'],
     format: ['progress']
   }
 }

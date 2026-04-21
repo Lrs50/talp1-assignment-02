@@ -20,13 +20,12 @@ Feature: Assessment Matrix Management
       | David Martinez | Writes clean code | MPA |
       | Emma Thompson | Understands OOP concepts | MANA |
     When I select "Software Engineering 101" from the class dropdown
-    Then I should see the assessment matrix with:
-      - Row headers: David Martinez, Emma Thompson
-      - Column headers: Understands OOP concepts, Writes clean code
-      - Cell for David Martinez / "Understands OOP concepts" showing "MA"
-      - Cell for David Martinez / "Writes clean code" showing "MPA"
-      - Cell for Emma Thompson / "Understands OOP concepts" showing "MANA"
-      - Empty cell for Emma Thompson / "Writes clean code"
+    Then I should see the assessment matrix with row headers "David Martinez" and "Emma Thompson"
+    And I should see the column headers "Understands OOP concepts" and "Writes clean code"
+    And the cell for David Martinez and "Understands OOP concepts" should show "MA"
+    And the cell for David Martinez and "Writes clean code" should show "MPA"
+    And the cell for Emma Thompson and "Understands OOP concepts" should show "MANA"
+    And the cell for Emma Thompson and "Writes clean code" should be empty
 
   Scenario: Edit a grade in the assessment matrix (inline)
     Given there is a class "Database Design 102" with enrolled student "Frank Garcia"

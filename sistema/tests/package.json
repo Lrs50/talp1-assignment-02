@@ -1,9 +1,13 @@
 {
   "name": "tests",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "test": "cucumber-js",
+    "test": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature'",
+    "test:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature' 2>&1 | tail -10",
+    "test:students": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature'",
+    "test:students:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature' 2>&1 | tail -5",
+    "test:ui": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' --require '../tests/step_definitions/students.ui.js' '../tests/features/students.feature'",
+    "test:failed": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/**/*.feature' 2>&1 | grep -E '^(\\d+\\)|✔|✖|\\?)'",
     "test:watch": "cucumber-js --watch"
   },
   "dependencies": {
