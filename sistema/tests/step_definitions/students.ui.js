@@ -23,6 +23,9 @@ Before(function () {
 // Single definition covers both Given/When/And keyword variants
 Given('I am on the students page', async function () {
   await driver.get(BASE_URL)
+  // Force a true reload — driver.get(same_url) can be a no-op in Chrome
+  // when the SPA is already at BASE_URL, leaving stale component state.
+  await driver.navigate().refresh()
   await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
 })
 

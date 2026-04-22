@@ -12,7 +12,6 @@ const context = {
   students: {},
 }
 
-// Sync — just grabs the shared driver and resets in-memory state
 Before(function () {
   driver = getDriver()
   context.students = {}
@@ -23,8 +22,12 @@ Before(function () {
 async function navigateToAssessments() {
   await driver.get(BASE_URL)
   await driver.wait(until.elementLocated(By.css('.app-nav')), 10000)
-  const btn = await driver.findElement(By.xpath('//button[normalize-space()="Assessments"]'))
-  await btn.click()
+  // Always go Students → Assessments so AssessmentsPage unmounts and remounts fresh.
+  const studentsBtn = await driver.findElement(By.xpath('//button[normalize-space()="Students"]'))
+  await studentsBtn.click()
+  await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
+  const assessmentsBtn = await driver.findElement(By.xpath('//button[normalize-space()="Assessments"]'))
+  await assessmentsBtn.click()
   await driver.wait(
     until.elementLocated(By.css('.assessment-matrix, .empty-state')),
     10000,
@@ -131,7 +134,20 @@ When(
 
 Then('the response should list {int} students', async function (count) {
   if (count === 0) {
-    await driver.wait(until.elementLocated(By.css('.empty-state')), 5000)
+    // If the matrix is still visible after navigation (stale Docker/VirtioFS write),
+    // bounce Students → Assessments to force a new loadMatrix() fetch.
+    await driver.wait(async () => {
+      const matrices = await driver.findElements(By.css('.assessment-matrix'))
+      const empties = await driver.findElements(By.css('.empty-state'))
+      if (empties.length > 0 && matrices.length === 0) return true
+      try {
+        const s = await driver.findElements(By.xpath('//button[normalize-space()="Students"]'))
+        if (s.length) { await s[0].click(); await driver.sleep(500) }
+        const a = await driver.findElements(By.xpath('//button[normalize-space()="Assessments"]'))
+        if (a.length) { await a[0].click(); await driver.sleep(2000) }
+      } catch {}
+      return false
+    }, 15000, 'Timed out waiting for empty assessments page')
     const text = await driver.findElement(By.css('.empty-state')).getText()
     expect(text).to.include('No students registered')
   } else {

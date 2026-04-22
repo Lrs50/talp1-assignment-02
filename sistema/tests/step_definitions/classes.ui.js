@@ -24,10 +24,14 @@ Before(function () {
 async function navigateToClasses() {
   await driver.get(BASE_URL)
   await driver.wait(until.elementLocated(By.css('.app-nav')), 10000)
-  const btn = await driver.findElement(By.xpath('//button[normalize-space()="Classes"]'))
-  await btn.click()
+  // Click Students first to guarantee ClassesPage unmounts on the next click
+  // (prevents stale component state when already on this SPA URL).
+  const studentsBtn = await driver.findElement(By.xpath('//button[normalize-space()="Students"]'))
+  await studentsBtn.click()
+  await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
+  const classesBtn = await driver.findElement(By.xpath('//button[normalize-space()="Classes"]'))
+  await classesBtn.click()
   await driver.wait(until.elementLocated(By.css('.classes-page')), 10000)
-  // Wait for the list to finish loading
   await driver.wait(
     until.elementLocated(By.css('.classes-list table, .classes-list p')),
     10000,

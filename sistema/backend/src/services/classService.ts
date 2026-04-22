@@ -9,6 +9,7 @@ import {
   getStudents,
 } from './data.js'
 import { GOALS } from './assessmentService.js'
+import { queueNotification } from './emailService.js'
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -188,10 +189,18 @@ export async function setClassAssessment(
     (a) => a.classId === classId && a.studentId === studentId && a.goal === goal,
   )
 
+  const allStudents = await getStudents()
+  const student = allStudents.find((s) => s.id === studentId)
+  const allClasses = await getClasses()
+  const cls = allClasses.find((c) => c.id === classId)
+
   if (index !== -1) {
     assessments[index].grade = grade
     assessments[index].updatedAt = new Date().toISOString()
     await saveClassAssessments(assessments)
+    if (student && cls) {
+      await queueNotification({ studentId, studentName: student.name, studentEmail: student.email, classId, className: cls.topic, goal, grade })
+    }
     return { success: true, data: assessments[index] }
   }
 
@@ -206,6 +215,9 @@ export async function setClassAssessment(
   }
   assessments.push(assessment)
   await saveClassAssessments(assessments)
+  if (student && cls) {
+    await queueNotification({ studentId, studentName: student.name, studentEmail: student.email, classId, className: cls.topic, goal, grade })
+  }
   return { success: true, data: assessment }
 }
 

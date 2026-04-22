@@ -40,6 +40,8 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
   const [allStudents, setAllStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(false)
   const [enrollingId, setEnrollingId] = useState('')
+  const [enrolling, setEnrolling] = useState(false)
+  const [removing, setRemoving] = useState<string | null>(null)
   const [savingCell, setSavingCell] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -76,6 +78,7 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
   const handleEnroll = async () => {
     if (!enrollingId) return
     setMessage(null)
+    setEnrolling(true)
     try {
       const res = await fetch(`/classes/${classId}/students`, {
         method: 'POST',
@@ -92,12 +95,15 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
       }
     } catch {
       setMessage({ type: 'error', text: 'Failed to enroll student' })
+    } finally {
+      setEnrolling(false)
     }
   }
 
   const handleRemove = async (studentId: string) => {
     if (!confirm('Remove this student from the class?')) return
     setMessage(null)
+    setRemoving(studentId)
     try {
       const res = await fetch(`/classes/${classId}/students/${studentId}`, { method: 'DELETE' })
       const json = await res.json()
@@ -109,6 +115,8 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
       }
     } catch {
       setMessage({ type: 'error', text: 'Failed to remove student' })
+    } finally {
+      setRemoving(null)
     }
   }
 
@@ -117,19 +125,18 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
     setSavingCell(cellKey)
     setMessage(null)
     try {
-      if (grade === '') {
-        await fetch(`/classes/${classId}/assessments/${studentId}/${encodeURIComponent(goal)}`, {
-          method: 'DELETE',
-        })
+      const url = `/classes/${classId}/assessments/${studentId}/${encodeURIComponent(goal)}`
+      const res = await fetch(url, grade === ''
+        ? { method: 'DELETE' }
+        : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ grade }) }
+      )
+      const json = await res.json()
+      if (json.success) {
+        setMessage({ type: 'success', text: 'Assessment saved' })
+        await loadDetail()
       } else {
-        await fetch(`/classes/${classId}/assessments/${studentId}/${encodeURIComponent(goal)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ grade }),
-        })
+        setMessage({ type: 'error', text: json.error ?? 'Failed to save assessment' })
       }
-      setMessage({ type: 'success', text: 'Assessment saved' })
-      await loadDetail()
     } catch {
       setMessage({ type: 'error', text: 'Failed to save assessment' })
     } finally {
@@ -169,8 +176,8 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
-          <button onClick={handleEnroll} disabled={!enrollingId} className="btn-enroll">
-            Enroll
+          <button onClick={handleEnroll} disabled={!enrollingId || enrolling} className="btn-enroll">
+            {enrolling ? 'Enrolling…' : 'Enroll'}
           </button>
         </div>
       )}
@@ -217,6 +224,7 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
                     <button
                       onClick={() => handleRemove(student.id)}
                       className="btn-delete btn-remove-student"
+                      disabled={removing === student.id}
                       aria-label={`Remove ${student.name}`}
                     >
                       ✕

@@ -60,6 +60,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { topic, year, semester } = req.body
+    if (topic === undefined && year === undefined && semester === undefined) {
+      res.status(400).json({ success: false, error: 'At least one field (topic, year or semester) must be provided' })
+      return
+    }
     const result = await updateClass(req.params.id, {
       ...(topic !== undefined && { topic }),
       ...(year !== undefined && { year: Number(year) }),

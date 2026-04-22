@@ -43,3 +43,18 @@ export interface ClassAssessment {
   createdAt: string
   updatedAt: string
 }
+
+export interface EmailNotification {
+  id: string
+  studentId: string
+  studentName: string
+  studentEmail: string
+  classId: string
+  className: string
+  goal: string
+  grade: Grade
+  date: string
+  sent: boolean
+  createdAt: string
+  updatedAt: string
+}

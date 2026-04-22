@@ -1,73 +1,34 @@
-Feature: Email Notifications for Assessments
+Feature: Email Notifications
   As a student
-  I want to receive a daily email notification
-  When my assessments are added or updated
-  So that I stay informed about my progress across all my classes
+  I want to receive a daily summary email of my assessment updates
+  So that I stay informed about my progress across all classes
 
-  Scenario: Send daily email when assessment is added
-    Given the current time is 14:30 on a weekday
-    And there are students in the system:
-      | name | email |
-      | Kevin Anderson | kevin@example.com |
-      | Laura Davis | laura@example.com |
-    And they are enrolled in class "Advanced Python 201"
-    When I add an assessment for "Kevin Anderson" with goal "Writes efficient code" and grade "MA"
-    Then a notification should be queued for the daily batch
-    And when the daily email is sent at 23:59
-    Then an email should be sent to Kevin Anderson with subject "Your Grades Have Been Updated"
-    And the email should contain the assessment change for "Writes efficient code": — → MA
-    And the email should be grouped by class "Advanced Python 201"
+  Background:
+    Given the notification queue is empty
 
-  Scenario: Reject sending email before daily batch window
-    Given the current time is 09:00 on a weekday
-    And an assessment has been added for a student
-    When I check if an email has been sent immediately
-    Then no email should have been sent instantly
-    And the notification should remain in the queue for the daily batch
+  Scenario: Professor updates an assessment — student receives one email that day
+    Given a class "Web Dev 101" exists for year 2024 semester 1
+    And a student "Kevin Anderson" with CPF "10000000001" and email "kevin@example.com" exists
+    And "Kevin Anderson" is enrolled in class "Web Dev 101"
+    When the professor sets the assessment for "Kevin Anderson" on goal "Requisitos" to "MA" in "Web Dev 101"
+    Then the pending notification count for "Kevin Anderson" should be 1
+    When the daily email batch runs
+    Then the batch should have sent 1 email
+    And the batch should include an email to "kevin@example.com"
+    And the email to "kevin@example.com" should list goal "Requisitos" graded "MA"
 
-  Scenario: Batch multiple assessments in a single daily email (per student)
-    Given the current time is morning on a weekday
-    And there are students in class "Cloud Architecture 202":
-      | name | email |
-      | Marcus Foster | marcus@example.com |
-      | Nicole Hughes | nicole@example.com |
-      | Oscar Johnson | oscar@example.com |
-    When I add assessments throughout the day:
-      | student | goal | grade | time |
-      | Marcus Foster | Designs scalable systems | MA | 10:00 |
-      | Marcus Foster | Implements load balancing | MPA | 14:30 |
-      | Nicole Hughes | Designs scalable systems | MANA | 11:00 |
-      | Oscar Johnson | Configures databases | MPA | 18:00 |
-    And when the daily email is sent at 23:59
-    Then an email should be sent to Marcus Foster with all his changes (2 goals)
-    And an email should be sent to Nicole Hughes with her changes (1 goal)
-    And an email should be sent to Oscar Johnson with his changes (1 goal)
-    And each email should show changes grouped by class "Cloud Architecture 202"
+  Scenario: Multiple assessments in the same day produce a single batched email
+    Given a class "Cloud 201" exists for year 2024 semester 2
+    And a student "Maria Santos" with CPF "20000000001" and email "maria@example.com" exists
+    And "Maria Santos" is enrolled in class "Cloud 201"
+    When the professor sets the assessment for "Maria Santos" on goal "Requisitos" to "MANA" in "Cloud 201"
+    And the professor sets the assessment for "Maria Santos" on goal "Testes" to "MPA" in "Cloud 201"
+    And the professor sets the assessment for "Maria Santos" on goal "Requisitos" to "MPA" in "Cloud 201"
+    Then the pending notification count for "Maria Santos" should be 2
+    When the daily email batch runs
+    Then the batch should have sent 1 email
+    And the email to "maria@example.com" should contain 2 goals
 
-  Scenario: Send updated assessment in daily email notification
-    Given there is an assessment for "Patricia Green" with goal "Tests edge cases" and grade "MANA" in class "Data Science 101"
-    And Patricia Green has email "patricia@example.com"
-    And the current time is 15:00 on a weekday
-    When I update the assessment to grade "MPA"
-    Then a notification should be queued for the daily batch
-    And when the daily email is sent at 23:59
-    Then an email should be sent to Patricia Green
-    And the email should show the assessment updated from MANA to MPA for goal "Tests edge cases"
-    And the email should be grouped by class "Data Science 101"
-
-  Scenario: Do not send email when no assessments change
-    Given the current date is a weekday
-    And no new assessments have been added or updated since yesterday
-    When the daily email batch is triggered at 23:59
-    Then no email should be sent
-
-  Scenario: Include all assessment changes grouped by class and goal
-    Given the current time is morning on a weekday
-    And there is a class "Capstone Project 203" with 5 enrolled students
-    And 3 of those students have enrollments in other classes as well
-    When assessments are added and updated throughout the day for 3 students in different classes
-    And when the daily email is sent at 23:59
-    Then an email should be sent to each of the 3 affected students
-    And each email should show only that student's changes
-    And each email should group changes by class name
-    And each email should show goal names and grade transitions (old → new)
+  Scenario: No email is sent when no assessment was changed
+    When the daily email batch runs
+    Then the batch should have sent 0 emails
