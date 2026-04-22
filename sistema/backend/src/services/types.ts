@@ -17,3 +17,29 @@ export interface Assessment {
   createdAt: string
   updatedAt: string
 }
+
+export interface Class {
+  id: string
+  topic: string
+  year: number
+  semester: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Enrollment {
+  id: string
+  classId: string
+  studentId: string
+  createdAt: string
+}
+
+export interface ClassAssessment {
+  id: string
+  classId: string
+  studentId: string
+  goal: string
+  grade: Grade
+  createdAt: string
+  updatedAt: string
+}

@@ -1,36 +1,37 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { Student, Assessment } from './types.js'
+import { Student, Assessment, Class, Enrollment, ClassAssessment } from './types.js'
 
 const STUDENTS_FILE = path.join(process.cwd(), 'data', 'students.json')
 const ASSESSMENTS_FILE = path.join(process.cwd(), 'data', 'assessments.json')
+const CLASSES_FILE = path.join(process.cwd(), 'data', 'classes.json')
+const ENROLLMENTS_FILE = path.join(process.cwd(), 'data', 'enrollments.json')
+const CLASS_ASSESSMENTS_FILE = path.join(process.cwd(), 'data', 'class-assessments.json')
 
-export async function getStudents(): Promise<Student[]> {
+async function readJson<T>(file: string): Promise<T[]> {
   try {
-    const data = await fs.readFile(STUDENTS_FILE, 'utf-8')
-    return JSON.parse(data)
+    return JSON.parse(await fs.readFile(file, 'utf-8'))
   } catch {
     return []
   }
 }
 
-export async function saveStudents(students: Student[]): Promise<void> {
-  const dir = path.dirname(STUDENTS_FILE)
-  await fs.mkdir(dir, { recursive: true })
-  await fs.writeFile(STUDENTS_FILE, JSON.stringify(students, null, 2), 'utf-8')
+async function writeJson<T>(file: string, data: T[]): Promise<void> {
+  await fs.mkdir(path.dirname(file), { recursive: true })
+  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8')
 }
 
-export async function getAssessments(): Promise<Assessment[]> {
-  try {
-    const data = await fs.readFile(ASSESSMENTS_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return []
-  }
-}
+export const getStudents = () => readJson<Student>(STUDENTS_FILE)
+export const saveStudents = (d: Student[]) => writeJson(STUDENTS_FILE, d)
 
-export async function saveAssessments(assessments: Assessment[]): Promise<void> {
-  const dir = path.dirname(ASSESSMENTS_FILE)
-  await fs.mkdir(dir, { recursive: true })
-  await fs.writeFile(ASSESSMENTS_FILE, JSON.stringify(assessments, null, 2), 'utf-8')
-}
+export const getAssessments = () => readJson<Assessment>(ASSESSMENTS_FILE)
+export const saveAssessments = (d: Assessment[]) => writeJson(ASSESSMENTS_FILE, d)
+
+export const getClasses = () => readJson<Class>(CLASSES_FILE)
+export const saveClasses = (d: Class[]) => writeJson(CLASSES_FILE, d)
+
+export const getEnrollments = () => readJson<Enrollment>(ENROLLMENTS_FILE)
+export const saveEnrollments = (d: Enrollment[]) => writeJson(ENROLLMENTS_FILE, d)
+
+export const getClassAssessments = () => readJson<ClassAssessment>(CLASS_ASSESSMENTS_FILE)
+export const saveClassAssessments = (d: ClassAssessment[]) => writeJson(CLASS_ASSESSMENTS_FILE, d)

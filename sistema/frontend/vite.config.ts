@@ -12,6 +12,7 @@ export default defineConfig({
     proxy: {
       '/students': { target: apiTarget, changeOrigin: true },
       '/assessments': { target: apiTarget, changeOrigin: true },
+      '/classes': { target: apiTarget, changeOrigin: true },
       '/health': { target: apiTarget, changeOrigin: true },
     },
   },

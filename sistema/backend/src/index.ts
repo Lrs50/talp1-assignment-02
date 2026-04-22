@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import studentRoutes from './routes/studentRoutes.js'
 import assessmentRoutes from './routes/assessmentRoutes.js'
+import classRoutes from './routes/classRoutes.js'
 
 const app = express()
 
@@ -14,5 +15,6 @@ app.get('/health', (_req, res) => {
 
 app.use('/students', studentRoutes)
 app.use('/assessments', assessmentRoutes)
+app.use('/classes', classRoutes)
 
 export default app

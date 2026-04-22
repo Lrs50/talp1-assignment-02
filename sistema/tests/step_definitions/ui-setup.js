@@ -25,13 +25,17 @@ AfterAll(async function () {
   }
 })
 
-// Clean all student data before each scenario
+// Clean all data before each scenario
 Before(async function () {
   try {
-    const res = await axios.get(`${API_URL}/students`)
-    for (const student of res.data.data || []) {
-      await axios.delete(`${API_URL}/students/${student.id}`)
-    }
+    const [studentsRes, classesRes] = await Promise.all([
+      axios.get(`${API_URL}/students`),
+      axios.get(`${API_URL}/classes`),
+    ])
+    await Promise.all([
+      ...(studentsRes.data.data || []).map((s) => axios.delete(`${API_URL}/students/${s.id}`)),
+      ...(classesRes.data.data || []).map((c) => axios.delete(`${API_URL}/classes/${c.id}`)),
+    ])
   } catch {
     // ignore if API not ready
   }
