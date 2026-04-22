@@ -136,17 +136,44 @@ When(
   },
 )
 
+When(
+  'I update class {string} to topic {string} year {int} semester {int}',
+  async function (oldTopic, newTopic, year, semester) {
+    await navigateToClasses()
+
+    const rows = await driver.findElements(By.css('.classes-list table tbody tr'))
+    for (const row of rows) {
+      const text = await row.getText()
+      if (text.includes(oldTopic)) {
+        await row.findElement(By.css('button.btn-edit')).click()
+        await driver.sleep(300)
+        break
+      }
+    }
+
+    const topicInput = await driver.findElement(By.css('input[name="topic"]'))
+    await topicInput.clear()
+    await topicInput.sendKeys(newTopic)
+    await driver.findElement(By.css('select[name="year"]'))
+      .findElement(By.css(`option[value="${year}"]`)).click()
+    await driver.findElement(By.css('select[name="semester"]'))
+      .findElement(By.css(`option[value="${semester}"]`)).click()
+    await driver.findElement(By.css('button[type="submit"]')).click()
+    await driver.sleep(500)
+  },
+)
+
 When('I add student {string} to class {string}', async function (studentName, topic) {
   await navigateToClassDetail(topic)
 
-  const enrollSelect = await driver.wait(
-    until.elementLocated(By.css('select[aria-label="Select student to enroll"]')),
-    5000,
-  )
-  const options = await enrollSelect.findElements(By.css('option'))
-  for (const opt of options) {
-    if ((await opt.getText()) === studentName) {
-      await opt.click()
+  // Enroll UI is now a checkbox list
+  await driver.wait(until.elementLocated(By.css('.enroll-list')), 5000)
+  const items = await driver.findElements(By.css('.enroll-item'))
+  for (const item of items) {
+    const text = await item.getText()
+    if (text.trim() === studentName) {
+      const checkbox = await item.findElement(By.css('input[type="checkbox"]'))
+      await checkbox.click()
       break
     }
   }
@@ -155,6 +182,26 @@ When('I add student {string} to class {string}', async function (studentName, to
   await enrollBtn.click()
   await driver.sleep(500)
 })
+
+When(
+  'I enroll students {string} and {string} in class {string}',
+  async function (nameA, nameB, topic) {
+    await navigateToClassDetail(topic)
+
+    await driver.wait(until.elementLocated(By.css('.enroll-list')), 5000)
+    const items = await driver.findElements(By.css('.enroll-item'))
+    for (const item of items) {
+      const text = await item.getText()
+      if (text.trim() === nameA || text.trim() === nameB) {
+        await item.findElement(By.css('input[type="checkbox"]')).click()
+      }
+    }
+
+    const enrollBtn = await driver.findElement(By.css('button.btn-enroll'))
+    await enrollBtn.click()
+    await driver.sleep(500)
+  },
+)
 
 When('I remove student {string} from class {string}', async function (studentName, topic) {
   await navigateToClassDetail(topic)

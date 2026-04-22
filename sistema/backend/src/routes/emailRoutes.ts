@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { getPendingNotifications, sendDailyBatch } from '../services/emailService.js'
-import { saveNotifications } from '../services/data.js'
+import { getPendingNotifications, sendDailyBatch, clearPendingNotifications } from '../services/emailService.js'
 
 const router = Router()
 
@@ -27,7 +26,7 @@ router.post('/send-daily', async (_req: Request, res: Response) => {
 // DELETE /email/pending — clear the queue (test helper)
 router.delete('/pending', async (_req: Request, res: Response) => {
   try {
-    await saveNotifications([])
+    await clearPendingNotifications()
     res.json({ success: true })
   } catch {
     res.status(500).json({ success: false, error: 'Internal server error' })

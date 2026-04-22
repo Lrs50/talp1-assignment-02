@@ -8,7 +8,7 @@
     "test:email": "cd ../backend && cucumber-js --require '../tests/step_definitions/classes.js' --require '../tests/step_definitions/email.js' '../tests/features/email.feature'",
     "test:students": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature'",
     "test:students:summary": "cd ../backend && cucumber-js --require '../tests/step_definitions/students.js' '../tests/features/students.feature' 2>&1 | tail -5",
-    "test:assessments": "cd ../backend && cucumber-js --require '../tests/step_definitions/assessments.js' '../tests/features/assessments.feature'",
+    "test:assessments": "cd ../backend && cucumber-js --require '../tests/step_definitions/classes.js' --require '../tests/step_definitions/assessments.js' '../tests/features/assessments.feature'",
     "test:ui": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/students.ui.js' --require '../tests/step_definitions/assessments.ui.js' --require '../tests/step_definitions/classes.ui.js' --require '../tests/step_definitions/email.ui.js' '../tests/features/students.feature' '../tests/features/assessments.feature' '../tests/features/classes.feature' '../tests/features/email.feature'",
     "test:ui:email": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/classes.ui.js' --require '../tests/step_definitions/email.ui.js' '../tests/features/email.feature'",
     "test:ui:students": "cd ../backend && cucumber-js --require '../tests/step_definitions/ui-setup.js' --require '../tests/step_definitions/students.ui.js' '../tests/features/students.feature'",

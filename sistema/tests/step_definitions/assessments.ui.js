@@ -8,13 +8,8 @@ let driver
 const BASE_URL = 'http://frontend:5173'
 const API_URL = 'http://localhost:3001'
 
-const context = {
-  students: {},
-}
-
 Before(function () {
   driver = getDriver()
-  context.students = {}
 })
 
 // ===== HELPERS =====
@@ -22,12 +17,26 @@ Before(function () {
 async function navigateToAssessments() {
   await driver.get(BASE_URL)
   await driver.wait(until.elementLocated(By.css('.app-nav')), 10000)
-  // Always go Students → Assessments so AssessmentsPage unmounts and remounts fresh.
+  // Students → Assessments guarantees a fresh AssessmentsPage mount
   const studentsBtn = await driver.findElement(By.xpath('//button[normalize-space()="Students"]'))
   await studentsBtn.click()
   await driver.wait(until.elementLocated(By.css('input[name="name"]')), 10000)
   const assessmentsBtn = await driver.findElement(By.xpath('//button[normalize-space()="Assessments"]'))
   await assessmentsBtn.click()
+  // Wait for the class selector to appear
+  await driver.wait(until.elementLocated(By.css('select#class-select')), 10000)
+}
+
+async function selectClass(topic) {
+  const select = await driver.findElement(By.css('select#class-select'))
+  const options = await select.findElements(By.css('option'))
+  for (const opt of options) {
+    const text = await opt.getText()
+    if (text.includes(topic)) {
+      await opt.click()
+      break
+    }
+  }
   await driver.wait(
     until.elementLocated(By.css('.assessment-matrix, .empty-state')),
     10000,
@@ -37,8 +46,7 @@ async function navigateToAssessments() {
 async function getGoalColumnIndex(goal) {
   const headers = await driver.findElements(By.css('.assessment-matrix thead tr th'))
   for (let i = 0; i < headers.length; i++) {
-    const text = await headers[i].getText()
-    if (text === goal) return i
+    if ((await headers[i].getText()) === goal) return i
   }
   return -1
 }
@@ -46,8 +54,7 @@ async function getGoalColumnIndex(goal) {
 async function getStudentRow(studentName) {
   const rows = await driver.findElements(By.css('.assessment-matrix tbody tr'))
   for (const row of rows) {
-    const nameCell = await row.findElement(By.css('.student-name'))
-    const name = await nameCell.getText()
+    const name = await row.findElement(By.css('.student-name')).then((el) => el.getText())
     if (name === studentName) return row
   }
   return null
@@ -59,97 +66,97 @@ Given('the assessments data is clean', function () {
   // handled by ui-setup.js Before hook
 })
 
-Given('there are students registered:', async function (dataTable) {
-  const rows = dataTable.hashes()
-  for (const row of rows) {
-    try {
-      const res = await axios.post(`${API_URL}/students`, {
-        name: row.name,
-        cpf: row.CPF,
-        email: row.email,
-      })
-      if (res.data.data) context.students[row.name] = res.data.data
-    } catch (err) {
-      console.error('Failed to create student:', err.message)
-    }
-  }
-})
-
-Given(
-  'a student {string} with CPF {string} and email {string} is registered',
-  async function (name, cpf, email) {
-    try {
-      const res = await axios.post(`${API_URL}/students`, { name, cpf, email })
-      if (res.data.data) context.students[name] = res.data.data
-    } catch (err) {
-      console.error('Failed to create student:', err.message)
-    }
-  },
-)
-
-Given('{string} has grade {string} on goal {string}', async function (studentName, grade, goal) {
-  const student = context.students[studentName]
-  try {
-    await axios.put(
-      `${API_URL}/assessments/${student.id}/${encodeURIComponent(goal)}`,
-      { grade },
-    )
-  } catch (err) {
-    console.error('Failed to set initial grade:', err.message)
-  }
-})
-
-Given('there are no students registered', function () {
-  // students already cleared by ui-setup.js Before hook
-})
-
 // ===== WHEN STEPS =====
 
-When('I request the assessments table', async function () {
+When('I request the assessments for class {string}', async function (topic) {
   await navigateToAssessments()
+  await selectClass(topic)
 })
 
 When(
-  'I set the grade {string} for student {string} on goal {string}',
-  async function (grade, studentName, goal) {
+  'I set the assessment for {string} to {string} on goal {string} in class {string}',
+  async function (studentName, grade, goal, topic) {
     await navigateToAssessments()
-
+    await selectClass(topic)
     await driver.wait(until.elementLocated(By.css('.assessment-matrix')), 10000)
 
     const goalIndex = await getGoalColumnIndex(goal)
-    expect(goalIndex).to.not.equal(-1, `Goal "${goal}" not found in table headers`)
+    expect(goalIndex).to.not.equal(-1, `Goal "${goal}" not found`)
 
     const row = await getStudentRow(studentName)
     expect(row).to.not.be.null
 
     const cells = await row.findElements(By.css('td'))
     const select = await cells[goalIndex].findElement(By.css('select'))
-    const option = await select.findElement(By.css(`option[value="${grade}"]`))
-    await option.click()
-    await driver.sleep(300)
+    await select.findElement(By.css(`option[value="${grade}"]`)).click()
+    await driver.sleep(500)
   },
 )
 
+When('I add the goal {string}', async function (name) {
+  await navigateToAssessments()
+  const input = await driver.findElement(By.css('input[aria-label="New goal name"]'))
+  await input.clear()
+  await input.sendKeys(name)
+  const btn = await driver.findElement(By.css('.goal-add button'))
+  await btn.click()
+  await driver.sleep(300)
+})
+
+When('I remove the goal {string}', async function (name) {
+  const chips = await driver.findElements(By.css('.goal-chip'))
+  for (const chip of chips) {
+    const text = await chip.getText()
+    if (text.includes(name)) {
+      await chip.findElement(By.css('button')).click()
+      await driver.wait(until.alertIsPresent(), 3000)
+      await driver.switchTo().alert().accept()
+      await driver.sleep(300)
+      break
+    }
+  }
+})
+
 // ===== THEN STEPS =====
 
-Then('the response should list {int} students', async function (count) {
+Then('the assessment response should contain student {string}', async function (studentName) {
+  await driver.wait(until.elementLocated(By.css('.assessment-matrix tbody')), 5000)
+  const tbody = await driver.findElement(By.css('.assessment-matrix tbody'))
+  expect(await tbody.getText()).to.include(studentName)
+})
+
+Then('the assessment response should include goal {string}', async function (goal) {
+  const headers = await driver.findElements(By.css('.assessment-matrix thead tr th'))
+  const texts = []
+  for (const h of headers) texts.push(await h.getText())
+  expect(texts).to.include(goal)
+})
+
+Then('the assessment response should return success', async function () {
+  const msg = await driver.wait(until.elementLocated(By.css('.message-success')), 5000)
+  expect(await msg.getText()).to.not.be.empty
+})
+
+Then(
+  'the grade {string} should be recorded for {string} on goal {string} in class {string}',
+  async function (grade, studentName, goal, _topic) {
+    await driver.sleep(300)
+    const goalIndex = await getGoalColumnIndex(goal)
+    const row = await getStudentRow(studentName)
+    expect(row).to.not.be.null
+    const cells = await row.findElements(By.css('td'))
+    const select = await cells[goalIndex].findElement(By.css('select'))
+    expect(await select.getAttribute('value')).to.equal(grade)
+  },
+)
+
+Then('the assessment response should contain {int} students', async function (count) {
   if (count === 0) {
-    // If the matrix is still visible after navigation (stale Docker/VirtioFS write),
-    // bounce Students → Assessments to force a new loadMatrix() fetch.
     await driver.wait(async () => {
-      const matrices = await driver.findElements(By.css('.assessment-matrix'))
       const empties = await driver.findElements(By.css('.empty-state'))
-      if (empties.length > 0 && matrices.length === 0) return true
-      try {
-        const s = await driver.findElements(By.xpath('//button[normalize-space()="Students"]'))
-        if (s.length) { await s[0].click(); await driver.sleep(500) }
-        const a = await driver.findElements(By.xpath('//button[normalize-space()="Assessments"]'))
-        if (a.length) { await a[0].click(); await driver.sleep(2000) }
-      } catch {}
-      return false
-    }, 15000, 'Timed out waiting for empty assessments page')
-    const text = await driver.findElement(By.css('.empty-state')).getText()
-    expect(text).to.include('No students registered')
+      const matrices = await driver.findElements(By.css('.assessment-matrix'))
+      return empties.length > 0 && matrices.length === 0
+    }, 10000, 'Timed out waiting for empty assessment page')
   } else {
     await driver.wait(until.elementLocated(By.css('.assessment-matrix tbody tr')), 5000)
     const rows = await driver.findElements(By.css('.assessment-matrix tbody tr'))
@@ -157,34 +164,18 @@ Then('the response should list {int} students', async function (count) {
   }
 })
 
-Then('the goals list should include {string}', async function (goal) {
-  const headers = await driver.findElements(By.css('.assessment-matrix thead tr th'))
+Then('the goals list should contain {string}', async function (goal) {
+  await driver.sleep(300)
+  const chips = await driver.findElements(By.css('.goal-chip'))
   const texts = []
-  for (const h of headers) texts.push(await h.getText())
-  expect(texts).to.include(goal)
+  for (const chip of chips) texts.push(await chip.getText())
+  expect(texts.some((t) => t.includes(goal))).to.be.true
 })
 
-Then('the response should return success', async function () {
-  const msgDiv = await driver.wait(
-    until.elementLocated(By.css('.message-success')),
-    5000,
-  )
-  const text = await msgDiv.getText()
-  expect(text).to.include('Assessment saved')
+Then('the goals list should not contain {string}', async function (goal) {
+  await driver.sleep(300)
+  const chips = await driver.findElements(By.css('.goal-chip'))
+  const texts = []
+  for (const chip of chips) texts.push(await chip.getText())
+  expect(texts.some((t) => t.includes(goal))).to.be.false
 })
-
-Then(
-  'the grade {string} should be stored for {string} on goal {string}',
-  async function (grade, studentName, goal) {
-    await driver.sleep(300)
-
-    const goalIndex = await getGoalColumnIndex(goal)
-    const row = await getStudentRow(studentName)
-    expect(row).to.not.be.null
-
-    const cells = await row.findElements(By.css('td'))
-    const select = await cells[goalIndex].findElement(By.css('select'))
-    const value = await select.getAttribute('value')
-    expect(value).to.equal(grade)
-  },
-)

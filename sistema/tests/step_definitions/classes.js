@@ -7,7 +7,10 @@ const {
   saveClasses,
   saveEnrollments,
   saveClassAssessments,
+  saveGoals,
 } = require('../../backend/dist/services/data.js')
+
+const DEFAULT_GOALS = ['Requirements', 'Tests', 'Implementation', 'Documentation']
 
 const app = appModule.default || appModule
 
@@ -23,6 +26,7 @@ Before(async function () {
   await saveClasses([])
   await saveEnrollments([])
   await saveClassAssessments([])
+  await saveGoals(DEFAULT_GOALS)
   context.classes = {}
   context.students = {}
   context.response = null
@@ -77,6 +81,32 @@ When(
     context.response = res.body
     context.statusCode = res.status
     if (res.body.data) context.classes[topic] = res.body.data
+  },
+)
+
+When(
+  'I update class {string} to topic {string} year {int} semester {int}',
+  async function (oldTopic, newTopic, year, semester) {
+    const cls = context.classes[oldTopic]
+    const res = await request(app)
+      .put(`/classes/${cls.id}`)
+      .send({ topic: newTopic, year, semester })
+    context.response = res.body
+    context.statusCode = res.status
+    if (res.body.data) context.classes[newTopic] = res.body.data
+  },
+)
+
+When(
+  'I enroll students {string} and {string} in class {string}',
+  async function (nameA, nameB, topic) {
+    const cls = context.classes[topic]
+    const studentIds = [context.students[nameA].id, context.students[nameB].id]
+    const res = await request(app)
+      .post(`/classes/${cls.id}/students/bulk`)
+      .send({ studentIds })
+    context.response = res.body
+    context.statusCode = res.status
   },
 )
 

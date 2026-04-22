@@ -6,6 +6,7 @@ import {
   updateClass,
   deleteClass,
   enrollStudent,
+  enrollMultipleStudents,
   removeStudent,
   setClassAssessment,
   deleteClassAssessment,
@@ -93,7 +94,22 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 })
 
-// POST /classes/:id/students — enroll
+// POST /classes/:id/students/bulk — enroll multiple
+router.post('/:id/students/bulk', async (req: Request, res: Response) => {
+  try {
+    const { studentIds } = req.body
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      res.status(400).json({ success: false, error: 'studentIds array is required' })
+      return
+    }
+    const result = await enrollMultipleStudents(req.params.id, studentIds)
+    res.json(result)
+  } catch {
+    res.status(500).json({ success: false, error: 'Internal server error' })
+  }
+})
+
+// POST /classes/:id/students — enroll single
 router.post('/:id/students', async (req: Request, res: Response) => {
   try {
     const { studentId } = req.body

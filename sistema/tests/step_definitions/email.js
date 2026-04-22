@@ -8,7 +8,10 @@ const {
   saveEnrollments,
   saveClassAssessments,
   saveNotifications,
+  saveGoals,
 } = require('../../backend/dist/services/data.js')
+
+const DEFAULT_GOALS = ['Requirements', 'Tests', 'Implementation', 'Documentation']
 
 const app = appModule.default || appModule
 
@@ -40,6 +43,7 @@ Before(async function () {
   await saveClasses([])
   await saveEnrollments([])
   await saveClassAssessments([])
+  await saveGoals(DEFAULT_GOALS)
 
   emailCtx.classes = {}
   emailCtx.students = {}

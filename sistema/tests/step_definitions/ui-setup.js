@@ -25,7 +25,7 @@ AfterAll(async function () {
   }
 })
 
-// Clean all data before each scenario
+// Clean all data before each scenario and reset goals to English defaults
 Before(async function () {
   try {
     const [studentsRes, classesRes] = await Promise.all([
@@ -33,6 +33,7 @@ Before(async function () {
       axios.get(`${API_URL}/classes`),
     ])
     await Promise.all([
+      axios.post(`${API_URL}/goals/reset`),
       ...(studentsRes.data.data || []).map((s) => axios.delete(`${API_URL}/students/${s.id}`)),
       ...(classesRes.data.data || []).map((c) => axios.delete(`${API_URL}/classes/${c.id}`)),
     ])

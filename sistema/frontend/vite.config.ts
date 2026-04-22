@@ -11,8 +11,9 @@ export default defineConfig({
     allowedHosts: ['frontend', 'localhost'],
     proxy: {
       '/students': { target: apiTarget, changeOrigin: true },
-      '/assessments': { target: apiTarget, changeOrigin: true },
       '/classes': { target: apiTarget, changeOrigin: true },
+      '/goals': { target: apiTarget, changeOrigin: true },
+      '/email': { target: apiTarget, changeOrigin: true },
       '/health': { target: apiTarget, changeOrigin: true },
     },
   },

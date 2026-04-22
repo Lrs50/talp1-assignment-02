@@ -1,38 +1,142 @@
 .assessments-page {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: sans-serif;
+  padding: 2.5rem 2rem;
 }
 
 .assessments-page h1 {
-  margin-bottom: 1.5rem;
-  color: #333;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.grade-legend {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.02em;
 }
 
 .message {
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  border-left: 3px solid;
 }
 
 .message-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  border-color: var(--success);
+  color: var(--success);
 }
 
 .message-error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  border-color: var(--error);
+  color: var(--error);
 }
 
 .empty-state {
-  color: #666;
-  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.88rem;
 }
+
+.goal-management {
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  background: var(--bg-subtle);
+}
+
+.goal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.5rem;
+  background: var(--bg);
+}
+
+.goal-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.goal-chip button:hover { color: var(--error); }
+
+.goal-add {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.goal-add input {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  outline: none;
+  width: 180px;
+}
+
+.goal-add input:focus { border-color: var(--accent); }
+
+.goal-add button {
+  border: 1px solid var(--text);
+  background: none;
+  color: var(--text);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.goal-add button:disabled { opacity: 0.4; cursor: not-allowed; }
+.goal-add button:not(:disabled):hover { background: var(--bg-subtle); }
+
+.class-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.class-selector label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.class-selector select {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.88rem;
+  font-family: var(--font);
+  outline: none;
+  min-width: 240px;
+}
+
+.class-selector select:focus { border-color: var(--accent); }
 
 .matrix-wrapper {
   overflow-x: auto;
@@ -41,20 +145,21 @@
 .assessment-matrix {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .assessment-matrix th,
 .assessment-matrix td {
-  border: 1px solid #dee2e6;
-  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.6rem;
   text-align: center;
 }
 
 .assessment-matrix th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #495057;
+  background: var(--bg-subtle);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .student-col {
@@ -64,38 +169,43 @@
 
 .student-name {
   text-align: left;
-  font-weight: 500;
 }
 
 .grade-cell select {
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.82rem;
   cursor: pointer;
-  background: white;
-  min-width: 70px;
+  color: var(--text);
+  min-width: 72px;
+  font-family: var(--font);
+  outline: none;
+}
+
+.grade-cell select:focus {
+  border-color: var(--accent);
 }
 
 .grade-cell select:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .grade-MA select {
-  background-color: #d4edda;
-  border-color: #28a745;
-  color: #155724;
+  background: #f0f7f0;
+  border-color: #8fbc8f;
+  color: #1a4f1a;
 }
 
 .grade-MPA select {
-  background-color: #fff3cd;
-  border-color: #ffc107;
-  color: #856404;
+  background: #faf7f0;
+  border-color: #c8b96e;
+  color: #6b5a00;
 }
 
 .grade-MANA select {
-  background-color: #f8d7da;
-  border-color: #dc3545;
-  color: #721c24;
+  background: #faf0f0;
+  border-color: #c88f8f;
+  color: #7a1a1a;
 }

@@ -10,24 +10,37 @@ Feature: Email Notifications
     Given a class "Web Dev 101" exists for year 2024 semester 1
     And a student "Kevin Anderson" with CPF "10000000001" and email "kevin@example.com" exists
     And "Kevin Anderson" is enrolled in class "Web Dev 101"
-    When the professor sets the assessment for "Kevin Anderson" on goal "Requisitos" to "MA" in "Web Dev 101"
+    When the professor sets the assessment for "Kevin Anderson" on goal "Requirements" to "MA" in "Web Dev 101"
     Then the pending notification count for "Kevin Anderson" should be 1
     When the daily email batch runs
     Then the batch should have sent 1 email
     And the batch should include an email to "kevin@example.com"
-    And the email to "kevin@example.com" should list goal "Requisitos" graded "MA"
+    And the email to "kevin@example.com" should list goal "Requirements" graded "MA"
 
   Scenario: Multiple assessments in the same day produce a single batched email
     Given a class "Cloud 201" exists for year 2024 semester 2
     And a student "Maria Santos" with CPF "20000000001" and email "maria@example.com" exists
     And "Maria Santos" is enrolled in class "Cloud 201"
-    When the professor sets the assessment for "Maria Santos" on goal "Requisitos" to "MANA" in "Cloud 201"
-    And the professor sets the assessment for "Maria Santos" on goal "Testes" to "MPA" in "Cloud 201"
-    And the professor sets the assessment for "Maria Santos" on goal "Requisitos" to "MPA" in "Cloud 201"
+    When the professor sets the assessment for "Maria Santos" on goal "Requirements" to "MANA" in "Cloud 201"
+    And the professor sets the assessment for "Maria Santos" on goal "Tests" to "MPA" in "Cloud 201"
+    And the professor sets the assessment for "Maria Santos" on goal "Requirements" to "MPA" in "Cloud 201"
     Then the pending notification count for "Maria Santos" should be 2
     When the daily email batch runs
     Then the batch should have sent 1 email
     And the email to "maria@example.com" should contain 2 goals
+
+  Scenario: Student enrolled in two classes receives one batched email
+    Given a class "Algorithms 101" exists for year 2024 semester 1
+    And a class "Networks 101" exists for year 2024 semester 2
+    And a student "Pedro Alves" with CPF "30000000001" and email "pedro@example.com" exists
+    And "Pedro Alves" is enrolled in class "Algorithms 101"
+    And "Pedro Alves" is enrolled in class "Networks 101"
+    When the professor sets the assessment for "Pedro Alves" on goal "Requirements" to "MA" in "Algorithms 101"
+    And the professor sets the assessment for "Pedro Alves" on goal "Tests" to "MPA" in "Networks 101"
+    Then the pending notification count for "Pedro Alves" should be 2
+    When the daily email batch runs
+    Then the batch should have sent 1 email
+    And the email to "pedro@example.com" should contain 2 goals
 
   Scenario: No email is sent when no assessment was changed
     When the daily email batch runs

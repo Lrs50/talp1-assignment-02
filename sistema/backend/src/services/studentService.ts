@@ -1,10 +1,5 @@
 import { Student } from './types.js'
-import { getStudents, saveStudents } from './data.js'
-
-// Simple ID generation
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-}
+import { getStudents, saveStudents, generateId } from './data.js'
 
 // Validation
 function validateCPF(cpf: string): boolean {

@@ -39,7 +39,7 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
   const [detail, setDetail] = useState<ClassDetail | null>(null)
   const [allStudents, setAllStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(false)
-  const [enrollingId, setEnrollingId] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [enrolling, setEnrolling] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
   const [savingCell, setSavingCell] = useState<string | null>(null)
@@ -75,26 +75,34 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
     return a ? a.grade : ''
   }
 
+  const toggleStudent = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
   const handleEnroll = async () => {
-    if (!enrollingId) return
+    if (selectedIds.size === 0) return
     setMessage(null)
     setEnrolling(true)
     try {
-      const res = await fetch(`/classes/${classId}/students`, {
+      const res = await fetch(`/classes/${classId}/students/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: enrollingId }),
+        body: JSON.stringify({ studentIds: [...selectedIds] }),
       })
       const json = await res.json()
       if (json.success) {
-        setMessage({ type: 'success', text: 'Student enrolled' })
-        setEnrollingId('')
+        setMessage({ type: 'success', text: `${json.enrolled} student(s) enrolled` })
+        setSelectedIds(new Set())
         await loadDetail()
       } else {
         setMessage({ type: 'error', text: json.error })
       }
     } catch {
-      setMessage({ type: 'error', text: 'Failed to enroll student' })
+      setMessage({ type: 'error', text: 'Failed to enroll students' })
     } finally {
       setEnrolling(false)
     }
@@ -157,27 +165,39 @@ const ClassDetailPage: React.FC<ClassDetailPageProps> = ({ classId, onBack }) =>
         </div>
       </div>
 
+      <p className="grade-legend">
+        <span>MANA — Goal Not Yet Achieved</span>
+        <span>MPA — Goal Partially Achieved</span>
+        <span>MA — Goal Achieved</span>
+      </p>
+
       {message && (
         <div className={`message message-${message.type}`} role="alert">
           {message.text}
         </div>
       )}
 
-      {/* Enroll student */}
+      {/* Enroll students */}
       {availableStudents.length > 0 && (
         <div className="enroll-section">
-          <select
-            value={enrollingId}
-            onChange={(e) => setEnrollingId(e.target.value)}
-            aria-label="Select student to enroll"
-          >
-            <option value="">— Select student to enroll —</option>
+          <div className="enroll-list">
             {availableStudents.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <label key={s.id} className="enroll-item">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(s.id)}
+                  onChange={() => toggleStudent(s.id)}
+                />
+                {s.name}
+              </label>
             ))}
-          </select>
-          <button onClick={handleEnroll} disabled={!enrollingId || enrolling} className="btn-enroll">
-            {enrolling ? 'Enrolling…' : 'Enroll'}
+          </div>
+          <button
+            onClick={handleEnroll}
+            disabled={selectedIds.size === 0 || enrolling}
+            className="btn-enroll"
+          >
+            {enrolling ? 'Enrolling…' : `Enroll${selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
           </button>
         </div>
       )}
