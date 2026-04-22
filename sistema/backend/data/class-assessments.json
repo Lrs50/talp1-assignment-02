@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "1776828376145-vb749m6l5",
+    "classId": "1776827684829-4quqx8486",
+    "studentId": "1776827658330-5m8inylx3",
+    "goal": "Requirements",
+    "grade": "MANA",
+    "createdAt": "2026-04-22T03:26:16.145Z",
+    "updatedAt": "2026-04-22T03:26:16.145Z"
+  },
+  {
+    "id": "1776828378293-ucdb8slns",
+    "classId": "1776827684829-4quqx8486",
+    "studentId": "1776827658330-5m8inylx3",
+    "goal": "Tests",
+    "grade": "MANA",
+    "createdAt": "2026-04-22T03:26:18.293Z",
+    "updatedAt": "2026-04-22T03:26:18.293Z"
+  },
+  {
+    "id": "1776828379801-f3y4t6p0y",
+    "classId": "1776827684829-4quqx8486",
+    "studentId": "1776827658330-5m8inylx3",
+    "goal": "Implementation",
+    "grade": "MPA",
+    "createdAt": "2026-04-22T03:26:19.801Z",
+    "updatedAt": "2026-04-22T03:26:19.801Z"
+  },
+  {
+    "id": "1776828381224-3b3wirig2",
+    "classId": "1776827684829-4quqx8486",
+    "studentId": "1776827658330-5m8inylx3",
+    "goal": "Documentation",
+    "grade": "MA",
+    "createdAt": "2026-04-22T03:26:21.224Z",
+    "updatedAt": "2026-04-22T03:26:21.224Z"
+  },
+  {
+    "id": "1776828382589-dliq1127v",
+    "classId": "1776827684829-4quqx8486",
+    "studentId": "1776827658330-5m8inylx3",
+    "goal": "Score",
+    "grade": "MA",
+    "createdAt": "2026-04-22T03:26:22.589Z",
+    "updatedAt": "2026-04-22T03:26:22.589Z"
+  }
+]

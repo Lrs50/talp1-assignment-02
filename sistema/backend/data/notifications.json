@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": "1776828376151-g2apmeh45",
+    "studentId": "1776827658330-5m8inylx3",
+    "studentName": "Lucas Reis",
+    "studentEmail": "lucaspook12@gmail.com",
+    "classId": "1776827684829-4quqx8486",
+    "className": "Computer Engineering",
+    "goal": "Requirements",
+    "grade": "MANA",
+    "date": "2026-04-22",
+    "sent": true,
+    "createdAt": "2026-04-22T03:26:16.152Z",
+    "updatedAt": "2026-04-22T03:26:30.480Z"
+  },
+  {
+    "id": "1776828378300-7etx5bzy6",
+    "studentId": "1776827658330-5m8inylx3",
+    "studentName": "Lucas Reis",
+    "studentEmail": "lucaspook12@gmail.com",
+    "classId": "1776827684829-4quqx8486",
+    "className": "Computer Engineering",
+    "goal": "Tests",
+    "grade": "MANA",
+    "date": "2026-04-22",
+    "sent": true,
+    "createdAt": "2026-04-22T03:26:18.301Z",
+    "updatedAt": "2026-04-22T03:26:30.480Z"
+  },
+  {
+    "id": "1776828379812-es7hzj1eq",
+    "studentId": "1776827658330-5m8inylx3",
+    "studentName": "Lucas Reis",
+    "studentEmail": "lucaspook12@gmail.com",
+    "classId": "1776827684829-4quqx8486",
+    "className": "Computer Engineering",
+    "goal": "Implementation",
+    "grade": "MPA",
+    "date": "2026-04-22",
+    "sent": true,
+    "createdAt": "2026-04-22T03:26:19.812Z",
+    "updatedAt": "2026-04-22T03:26:30.480Z"
+  },
+  {
+    "id": "1776828381236-44dc5lf0i",
+    "studentId": "1776827658330-5m8inylx3",
+    "studentName": "Lucas Reis",
+    "studentEmail": "lucaspook12@gmail.com",
+    "classId": "1776827684829-4quqx8486",
+    "className": "Computer Engineering",
+    "goal": "Documentation",
+    "grade": "MA",
+    "date": "2026-04-22",
+    "sent": true,
+    "createdAt": "2026-04-22T03:26:21.236Z",
+    "updatedAt": "2026-04-22T03:26:30.480Z"
+  },
+  {
+    "id": "1776828382602-vs6cllqtm",
+    "studentId": "1776827658330-5m8inylx3",
+    "studentName": "Lucas Reis",
+    "studentEmail": "lucaspook12@gmail.com",
+    "classId": "1776827684829-4quqx8486",
+    "className": "Computer Engineering",
+    "goal": "Score",
+    "grade": "MA",
+    "date": "2026-04-22",
+    "sent": true,
+    "createdAt": "2026-04-22T03:26:22.603Z",
+    "updatedAt": "2026-04-22T03:26:30.480Z"
+  }
+]
